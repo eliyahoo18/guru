@@ -53,6 +53,12 @@ def convert_to_cmake_project(path):
 
 
 def move_code_files(path, src_path):
+    """
+    Moves all the cpp/h file to the 'src' folder and remove
+    the rest.
+    :param path: the rood of the directory.
+    :param src_path: the path of the 'src' directory.
+    """
     for file in os.listdir(path):
         # Save the full path
         fileFullPath = f"{path}/{file}"
