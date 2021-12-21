@@ -17,3 +17,5 @@ def active_command(parameters):
      |__|     \____|
         """)
     print("Hi back...")
+
+    replace_necessary_code_line(parameters[0])

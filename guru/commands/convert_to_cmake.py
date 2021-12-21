@@ -9,6 +9,12 @@ from guru.logger import report_on_file, Action
 
 COMMAND_NAME = "-to-cmake"
 MULTIPLE_CONVERTS = "-all"
+REPLACEMENT_LIST = {
+    "what() const": "what() const noexcept",
+    # Not ideal, but work fine... it's supposed to remove the one that added with the previous command
+    "what() const noexcept noexcept": "what() const noexcept",
+    "_exit(": "_Exit(",
+}
 
 
 def convert_all_to_cmake_projects(path):
@@ -91,8 +97,8 @@ def replace_necessary_code_line(path):
     Replace some line of code that work just with Window.
     :param path: the path of the code file (.cpp/.h).
     """
-    replace_consent_from_file(path, "what() const", "what() const noexcept")
-    replace_consent_from_file(path, "_exit(", "_Exit(")
+    for replace_form, replace_to in REPLACEMENT_LIST.items():
+        replace_consent_from_file(path, replace_form, replace_to)
 
 
 def create_cmake_list_file(path):

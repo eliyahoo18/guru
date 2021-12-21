@@ -13,8 +13,8 @@ def replace_consent_from_file(path, origin_text, replacement):
     file = open(path, "r+")
     # read all the file and replace what it's need.
     data = file.read().replace(origin_text, replacement)
-    # return to the start of the file
-    file.seek(0)
+    # remove all the old content of the file
+    file.truncate(0)
     # and write it back to the file
     file.write(data)
     # close the file
