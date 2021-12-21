@@ -3,6 +3,8 @@ import shutil
 import ntpath
 
 from termcolor import colored
+
+from guru.commands.replace_content import replace_consent_from_file
 from guru.logger import report_on_file, Action
 
 COMMAND_NAME = "-to-cmake"
@@ -23,7 +25,7 @@ def convert_all_to_cmake_projects(path):
             print(f"Try converting '{relativePath}': ")
 
             # Get inside the current directory
-            os.chdir(f"{directory}")
+            os.chdir(dirFullPath)
             convert_to_cmake_project(dirFullPath)
 
             # Report on finish
@@ -31,10 +33,6 @@ def convert_all_to_cmake_projects(path):
 
         except Exception as e:
             print(colored(e, 'red'))
-
-        finally:
-            # Move out from the directory
-            os.chdir(f"../..")
 
 
 def convert_to_cmake_project(path):
@@ -81,8 +79,20 @@ def move_code_files(path, src_path):
                 os.remove(fileFullPath)
                 report_on_file(fileFullPath, Action.Remove)
             elif os.path.exists(fileFullPath):
+                # Replace some line of code that work just with Window.
+                replace_necessary_code_line(fileFullPath)
+                # Move the file to the 'src' directory.
                 shutil.move(fileFullPath, src_path)
                 report_on_file(fileFullPath, Action.Add)
+
+
+def replace_necessary_code_line(path):
+    """
+    Replace some line of code that work just with Window.
+    :param path: the path of the code file (.cpp/.h).
+    """
+    replace_consent_from_file(path, "what() const", "what() const noexcept")
+    replace_consent_from_file(path, "_exit(", "_Exit(")
 
 
 def create_cmake_list_file(path):
