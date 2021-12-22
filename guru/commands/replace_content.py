@@ -10,14 +10,15 @@ def replace_consent_from_file(path, origin_text, replacement):
     :param replacement: the text to replace with.
     """
     # open file to read and write and point to the beginning.
-    file = open(path, "r+")
+    file = open(path, "r")
     # read all the file and replace what it's need.
     data = file.read().replace(origin_text, replacement)
+    file.close()
+
     # remove all the old content of the file
-    file.truncate(0)
+    file = open(path, "w")
     # and write it back to the file
     file.write(data)
-    # close the file
     file.close()
 
 
