@@ -18,5 +18,6 @@ def report_on_file(path, action):
       Action.Add: ("+", 'green'),
       Action.Remove: ("-", 'red'),
       Action.Modify: ("~", 'yellow'),
+      Action.Error: ("∆", 'red'),
    }[action]
    print(colored(f"{report[0]} {relativePath}", report[1]))

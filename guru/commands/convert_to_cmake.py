@@ -67,29 +67,37 @@ def move_code_files(path, src_path):
         # Save the full path
         fileFullPath = f"{path}/{file}"
 
-        if fileFullPath == src_path:
-            # Prevent form removing the 'src' folder
-            continue
-        elif os.path.isdir(fileFullPath):
-            # Move the code files (.cpp / .h) to the 'src' directory, and remove the rest
-            move_code_files(fileFullPath, src_path)
+        # so if one file failed it's will keep running
+        try:
+            if fileFullPath == src_path:
+                # Prevent form removing the 'src' folder
+                continue
 
-            # Remove this empty folder
-            shutil.rmtree(fileFullPath)
-            report_on_file(fileFullPath, Action.Remove)
-        else:
-            # Move the code files (.cpp / .h) to the 'src' directory...
-            fileName, extension = os.path.splitext(fileFullPath)
-            if extension != ".cpp" and extension != ".h":
-                # And remove the rest (Useless files...)
-                os.remove(fileFullPath)
+            elif os.path.isdir(fileFullPath):
+                # Move the code files (.cpp / .h) to the 'src' directory, and remove the rest
+                move_code_files(fileFullPath, src_path)
+
+                # Remove this empty folder
+                shutil.rmtree(fileFullPath)
                 report_on_file(fileFullPath, Action.Remove)
-            elif os.path.exists(fileFullPath):
-                # Replace some line of code that work just with Window.
-                replace_necessary_code_line(fileFullPath)
-                # Move the file to the 'src' directory.
-                shutil.move(fileFullPath, src_path)
-                report_on_file(fileFullPath, Action.Add)
+
+            else:
+                # Move the code files (.cpp / .h) to the 'src' directory...
+                fileName, extension = os.path.splitext(fileFullPath)
+                if extension != ".cpp" and extension != ".h":
+                    # And remove the rest (Useless files...)
+                    os.remove(fileFullPath)
+                    report_on_file(fileFullPath, Action.Remove)
+
+                elif os.path.exists(fileFullPath):
+                    # Replace some line of code that work just with Window.
+                    replace_necessary_code_line(fileFullPath)
+                    # Move the file to the 'src' directory.
+                    shutil.move(fileFullPath, src_path)
+                    report_on_file(fileFullPath, Action.Add)
+
+        except (OSError, NotImplementedError):
+            report_on_file(f"~ command on \"{fileFullPath}\" failed.", Action.Error)
 
 
 def replace_necessary_code_line(path):
@@ -152,4 +160,3 @@ def active_command(parameters):
 
     # Run just on the current directory
     convert_to_cmake_project(rootPath)
-

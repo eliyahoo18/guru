@@ -20,5 +20,3 @@ def replace_consent_from_file(path, origin_text, replacement):
     # and write it back to the file
     file.write(data)
     file.close()
-
-
