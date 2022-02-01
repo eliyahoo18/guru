@@ -3,7 +3,6 @@ import shutil
 import ntpath
 
 from termcolor import colored
-
 from guru.commands.replace_content import replace_consent_from_file
 from guru.logger import report_on_file, Action
 
@@ -137,7 +136,6 @@ def build():
     Create the 'cmake' necessary directories and
     files, and builds the project
     """
-
     print(os.popen('mkdir cmake-build-debug;cd cmake-build-debug;cmake ..;make').read())
 
 

@@ -1,6 +1,7 @@
 import guru.commands.say_hi
 import guru.commands.convert_to_cmake
 import guru.commands.chage_app_theme
+import guru.commands.process_bot
 
 from termcolor import colored
 
@@ -18,6 +19,10 @@ def commands(command, parameters):
     # Turn off the default theme for specific app.
     elif command == guru.commands.chage_app_theme.COMMAND_NAME:
         guru.commands.chage_app_theme.active_command(parameters)
+
+    #
+    elif command == guru.commands.process_bot.COMMAND_NAME:
+        guru.commands.process_bot.active_command(parameters)
 
     # Default case...
     else:
