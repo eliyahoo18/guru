@@ -9,6 +9,7 @@ from termcolor import colored
 COMMAND_NAME = "-pb"  # -> "process bot"
 PROCESS_NAME = 0
 INSTRUCTION_FILE_PATH = 1
+UNLIMITED = 0
 READ_FIRST_FLAG = ">>"
 TEST_MODE_FLAG = "(!)"
 HELP = \
@@ -86,7 +87,7 @@ def test_process_flow(process, instructions, read_first, in_test_mode):
 
     # read chuck of data before get into the loop and start write back to the process
     if read_first:
-        output = read_chunk_from_process(process)
+        output = read_chunk_from_process(process.stdout)
         if in_test_mode:
             # check that the process response how we expect
             if not confirms_output(output, instructions[0]):
@@ -107,8 +108,8 @@ def test_process_flow(process, instructions, read_first, in_test_mode):
             if (i + 1) >= len(instructions):
                 break
 
-        errors = read_chunk_from_process(process.stderr)
-        output = read_chunk_from_process(process.stdout)
+        errors = read_chunk_from_process(process.stderr, 3)  # 3 -> reasonable number of attempts...
+        output = read_chunk_from_process(process.stdout, 3)
 
         # if its not test mode, its print the process flow
         if not in_test_mode:
@@ -117,7 +118,8 @@ def test_process_flow(process, instructions, read_first, in_test_mode):
             if errors is not None:
                 print(colored(errors, "red"))
 
-            print(output)
+            if output is not None:
+                print(output)
 
         # check that the process response how we expect
         if in_test_mode and not confirms_output(output, instructions[i + 1]):
@@ -149,9 +151,9 @@ def parse_head_line(head_line):
     return READ_FIRST_FLAG in head_line, TEST_MODE_FLAG in head_line
 
 
-def read_chunk_from_process(process_stream, attempts=3):
+def read_chunk_from_process(process_stream, attempts=UNLIMITED):
     """
-    Reads (or at least try to read... three times by default) from process
+    Reads (or at least try to read... until its find something by default) from process
     stream, in every try its sleep for 0.1s to let the process time to respond.
     return None in case of failure.
     """
@@ -160,7 +162,14 @@ def read_chunk_from_process(process_stream, attempts=3):
     # this line disable that...
     fcntl.fcntl(process_stream, fcntl.F_SETFL, os.O_NONBLOCK)
 
-    for i in range(attempts):
+    attempts_count = 0
+    while True:
+        # breaks the loop if the number of attempts is specified
+        if attempts != UNLIMITED and attempts_count >= attempts:
+            return None
+
+        attempts_count += 1
+
         try:
             # checks for any output
             output = process_stream.read()
@@ -175,8 +184,6 @@ def read_chunk_from_process(process_stream, attempts=3):
 
         # gives the system its time to print
         time.sleep(.1)
-
-    return None
 
 
 def read_instructions_file(instructions_file_path):
