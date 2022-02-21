@@ -3,10 +3,17 @@ import shutil
 import ntpath
 
 from termcolor import colored
+from guru.commands.replace_content import replace_consent_from_file
 from guru.logger import report_on_file, Action
 
 COMMAND_NAME = "-to-cmake"
 MULTIPLE_CONVERTS = "-all"
+REPLACEMENT_LIST = {
+    "what() const": "what() const noexcept",
+    # Not ideal, but work fine... it's supposed to remove the one that added with the previous command
+    "what() const noexcept noexcept": "what() const noexcept",
+    "_exit(": "_Exit(",
+}
 
 
 def convert_all_to_cmake_projects(path):
@@ -23,7 +30,7 @@ def convert_all_to_cmake_projects(path):
             print(f"Try converting '{relativePath}': ")
 
             # Get inside the current directory
-            os.chdir(f"{directory}")
+            os.chdir(dirFullPath)
             convert_to_cmake_project(dirFullPath)
 
             # Report on finish
@@ -31,10 +38,6 @@ def convert_all_to_cmake_projects(path):
 
         except Exception as e:
             print(colored(e, 'red'))
-
-        finally:
-            # Move out from the directory
-            os.chdir(f"../..")
 
 
 def convert_to_cmake_project(path):
@@ -63,26 +66,46 @@ def move_code_files(path, src_path):
         # Save the full path
         fileFullPath = f"{path}/{file}"
 
-        if fileFullPath == src_path:
-            # Prevent form removing the 'src' folder
-            continue
-        elif os.path.isdir(fileFullPath):
-            # Move the code files (.cpp / .h) to the 'src' directory, and remove the rest
-            move_code_files(fileFullPath, src_path)
+        # so if one file failed it's will keep running
+        try:
+            if fileFullPath == src_path:
+                # Prevent form removing the 'src' folder
+                continue
 
-            # Remove this empty folder
-            shutil.rmtree(fileFullPath)
-            report_on_file(fileFullPath, Action.Remove)
-        else:
-            # Move the code files (.cpp / .h) to the 'src' directory...
-            fileName, extension = os.path.splitext(fileFullPath)
-            if extension != ".cpp" and extension != ".h":
-                # And remove the rest (Useless files...)
-                os.remove(fileFullPath)
+            elif os.path.isdir(fileFullPath):
+                # Move the code files (.cpp / .h) to the 'src' directory, and remove the rest
+                move_code_files(fileFullPath, src_path)
+
+                # Remove this empty folder
+                shutil.rmtree(fileFullPath)
                 report_on_file(fileFullPath, Action.Remove)
-            elif os.path.exists(fileFullPath):
-                shutil.move(fileFullPath, src_path)
-                report_on_file(fileFullPath, Action.Add)
+
+            else:
+                # Move the code files (.cpp / .h) to the 'src' directory...
+                fileName, extension = os.path.splitext(fileFullPath)
+                if extension != ".cpp" and extension != ".h":
+                    # And remove the rest (Useless files...)
+                    os.remove(fileFullPath)
+                    report_on_file(fileFullPath, Action.Remove)
+
+                elif os.path.exists(fileFullPath):
+                    # Replace some line of code that work just with Window.
+                    replace_necessary_code_line(fileFullPath)
+                    # Move the file to the 'src' directory.
+                    shutil.move(fileFullPath, src_path)
+                    report_on_file(fileFullPath, Action.Add)
+
+        except (OSError, NotImplementedError):
+            report_on_file(f"~ command on \"{fileFullPath}\" failed.", Action.Error)
+
+
+def replace_necessary_code_line(path):
+    """
+    Replace some line of code that work just with Window.
+    :param path: the path of the code file (.cpp/.h).
+    """
+    for replace_form, replace_to in REPLACEMENT_LIST.items():
+        replace_consent_from_file(path, replace_form, replace_to)
 
 
 def create_cmake_list_file(path):
@@ -113,7 +136,6 @@ def build():
     Create the 'cmake' necessary directories and
     files, and builds the project
     """
-
     print(os.popen('mkdir cmake-build-debug;cd cmake-build-debug;cmake ..;make').read())
 
 
@@ -136,4 +158,3 @@ def active_command(parameters):
 
     # Run just on the current directory
     convert_to_cmake_project(rootPath)
-

@@ -1,3 +1,5 @@
+from guru.commands.convert_to_cmake import replace_necessary_code_line
+
 COMMAND_NAME = "hi"
 
 
