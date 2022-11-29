@@ -2,11 +2,12 @@ import guru.commands.say_hi
 import guru.commands.convert_to_cmake
 import guru.commands.chage_app_theme
 import guru.commands.process_bot
-
-from termcolor import colored
+import guru.logger
 
 
 # Chose the command' and execute it
+
+
 def commands(command, parameters):
     # Say Hi!
     if command == guru.commands.say_hi.COMMAND_NAME:
@@ -26,4 +27,4 @@ def commands(command, parameters):
 
     # Default case...
     else:
-        print(colored(f"The command \"{command}\" not found", 'red'))
+        guru.logger.report(f"The command \"{command}\" not found", 'red')

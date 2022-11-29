@@ -15,7 +15,7 @@ def replace_consent_from_file(path, origin_text, replacement):
     data = file.read().replace(origin_text, replacement)
     file.close()
 
-    # remove all the old content of the file
+    # remove all the old content of the files
     file = open(path, "w")
     # and write it back to the file
     file.write(data)

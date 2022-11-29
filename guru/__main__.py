@@ -1,22 +1,26 @@
 import sys
+import guru.logger
+import guru.command
 
-from termcolor import colored
-from guru.command import commands
+from guru.logger import Action
 
 
 def main():
-    # Gets the command fields
-    args = sys.argv[1:]
-    if not args:
-        print(colored("What to do?", 'red'))
-        return
+    guru.logger.sys_report("activated", Action.Fine)
 
     try:
+        # Gets the command fields
+        args = sys.argv[1:]
+        if not args:
+            raise Exception("What to do?")
+
         # Search the command
-        commands(args[0], args[1:])
+        guru.command.commands(args[0], args[1:])
 
     except Exception as e:
-        print(colored(f"{e}\n\n", 'red'))
+        guru.logger.report(f"{e}", Action.Error)
+
+    guru.logger.sys_report("deactivated", Action.Fine)
 
 
 if __name__ == '__main__':

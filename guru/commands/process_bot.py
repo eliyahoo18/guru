@@ -3,8 +3,7 @@ import os
 import subprocess
 import time
 import re
-
-from termcolor import colored
+import guru.logger
 
 COMMAND_NAME = "-pb"  # -> "process bot"
 PROCESS_NAME = 0
@@ -72,9 +71,9 @@ def communicate_with_process(process_name, instructions_file_path):
     test_passed = test_process_flow(process, instructions, read_first, in_test_mode)
     if in_test_mode:
         if test_passed:
-            print(colored(PASS, "green"))
+            guru.logger.report(PASS, "green")
         else:
-            print(colored(FAILED, "red"))
+            guru.logger.report(FAILED, "red")
 
 
 def test_process_flow(process, instructions, read_first, in_test_mode):
@@ -113,10 +112,10 @@ def test_process_flow(process, instructions, read_first, in_test_mode):
 
         # if its not test mode, its print the process flow
         if not in_test_mode:
-            print(colored(write_line, "green"))
+            guru.logger.report(write_line, "green")
 
             if errors is not None:
-                print(colored(errors, "red"))
+                guru.logger.report(errors, "red")
 
             if output is not None:
                 print(output)
@@ -134,10 +133,10 @@ def test_process_flow(process, instructions, read_first, in_test_mode):
 def confirms_output(origin, test):
     # check that the process response how we expect
     if origin != test:
-        print(colored(test, "green"))
-        print(colored("↑↑↑↑| Need-To-Be |↑↑↑↑", "green"))
-        print(colored("↓↓↓↓| Actually   |↓↓↓↓", "red"))
-        print(colored(origin, "red"))
+        guru.logger.report(test, "green")
+        guru.logger.report("↑↑↑↑| Need-To-Be |↑↑↑↑", "green")
+        guru.logger.report("↓↓↓↓| Actually   |↓↓↓↓", "red")
+        guru.logger.report(origin, "red")
         return False
 
     return True

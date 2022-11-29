@@ -2,9 +2,8 @@ import os
 import shutil
 import ntpath
 
-from termcolor import colored
 from guru.commands.replace_content import replace_consent_from_file
-from guru.logger import report_on_file, Action
+from guru.logger import report_on_file, Action, report
 
 COMMAND_NAME = "-to-cmake"
 MULTIPLE_CONVERTS = "-all"
@@ -37,7 +36,7 @@ def convert_all_to_cmake_projects(path):
             print(f"'{relativePath}' successfully converted.")
 
         except Exception as e:
-            print(colored(e, 'red'))
+            report(e, 'red')
 
 
 def convert_to_cmake_project(path):
@@ -78,22 +77,22 @@ def move_code_files(path, src_path):
 
                 # Remove this empty folder
                 shutil.rmtree(fileFullPath)
-                report_on_file(fileFullPath, Action.Remove)
+                report_on_file(fileFullPath, Action.Bad)
 
             else:
                 # Move the code files (.cpp / .h) to the 'src' directory...
                 fileName, extension = os.path.splitext(fileFullPath)
-                if extension != ".cpp" and extension != ".h":
+                if extension != ".cpp" and extension != ".c" and extension != ".h" and extension != ".hpp":
                     # And remove the rest (Useless files...)
                     os.remove(fileFullPath)
-                    report_on_file(fileFullPath, Action.Remove)
+                    report_on_file(fileFullPath, Action.Bad)
 
                 elif os.path.exists(fileFullPath):
                     # Replace some line of code that work just with Window.
                     replace_necessary_code_line(fileFullPath)
                     # Move the file to the 'src' directory.
                     shutil.move(fileFullPath, src_path)
-                    report_on_file(fileFullPath, Action.Add)
+                    report_on_file(fileFullPath, Action.Fine)
 
         except (OSError, NotImplementedError):
             report_on_file(f"~ command on \"{fileFullPath}\" failed.", Action.Error)
@@ -104,8 +103,12 @@ def replace_necessary_code_line(path):
     Replace some line of code that work just with Window.
     :param path: the path of the code file (.cpp/.h).
     """
-    for replace_form, replace_to in REPLACEMENT_LIST.items():
-        replace_consent_from_file(path, replace_form, replace_to)
+    try:
+        for replace_form, replace_to in REPLACEMENT_LIST.items():
+            replace_consent_from_file(path, replace_form, replace_to)
+
+    except ValueError as e:
+        report_on_file(f"failed to read the file \"{path}\".", Action.Modify)
 
 
 def create_cmake_list_file(path):
