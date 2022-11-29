@@ -2,6 +2,8 @@ import os
 import shutil
 import ntpath
 
+from termcolor import colored
+
 from guru.commands.replace_content import replace_consent_from_file
 from guru.logger import report_on_file, Action, report
 
@@ -36,7 +38,7 @@ def convert_all_to_cmake_projects(path):
             print(f"'{relativePath}' successfully converted.")
 
         except Exception as e:
-            report(e, 'red')
+            report(e, Action.Error)
 
 
 def convert_to_cmake_project(path):
@@ -149,14 +151,20 @@ def active_command(parameters):
     :param parameters: The params from the user (expect to a list like that: ['-all']).
     """
     rootPath = os.getcwd()
-    # Confirms action
-    if input(f"Are you sure you wont to do this on this directory '{os.path.basename(rootPath)}' (y/n)? ") != 'y':
-        print("OK Cool, by.")
-        return
 
     if MULTIPLE_CONVERTS in parameters:
+        # Confirms action
+        if input(f"Are you sure you wont to convert {colored('all the folders', 'red')} in this directory '{os.path.basename(rootPath)}' (y/n)? ") != 'y':
+            print("OK Cool, by.")
+            return
+
         # Run on all the folders in the current directory (for converting multiple projects in once)
         convert_all_to_cmake_projects(rootPath)
+        return
+
+    # Confirms action
+    if input(f"Are you sure you wont to convert {colored('this specific', 'red')} directory '{os.path.basename(rootPath)}' (y/n)? ") != 'y':
+        print("OK Cool, by.")
         return
 
     # Run just on the current directory
