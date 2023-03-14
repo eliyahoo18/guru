@@ -2,6 +2,7 @@ import guru.commands.say_hi
 import guru.commands.convert_to_cmake
 import guru.commands.chage_app_theme
 import guru.commands.process_bot
+import guru.commands.diamond_analyst
 import guru.logger
 
 
@@ -24,6 +25,9 @@ def commands(command, parameters):
     #
     elif command == guru.commands.process_bot.COMMAND_NAME:
         guru.commands.process_bot.active_command(parameters)
+
+    elif command == guru.commands.diamond_analyst.COMMAND_NAME:
+        guru.commands.diamond_analyst.active_command(parameters)
 
     # Default case...
     else:

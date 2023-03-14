@@ -34,3 +34,6 @@ def report(msg, action):
 def report_on_file(path, action):
     relativePath = os.path.relpath(path, os.getcwd())
     print(colored(f"::guru {reports[action][0]} {relativePath}", reports[action][1]))
+
+def simple_print(msg, color):
+    print(colored(msg, color))

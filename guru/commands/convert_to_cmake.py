@@ -15,6 +15,7 @@ REPLACEMENT_LIST = {
     "what() const noexcept noexcept": "what() const noexcept",
     "_exit(": "_Exit(",
 }
+EXTENSION_NECESSARY_FILES = [".cpp", ".c", ".h", ".hpp"]
 
 
 def convert_all_to_cmake_projects(path):
@@ -84,7 +85,7 @@ def move_code_files(path, src_path):
             else:
                 # Move the code files (.cpp / .h) to the 'src' directory...
                 fileName, extension = os.path.splitext(fileFullPath)
-                if extension != ".cpp" and extension != ".c" and extension != ".h" and extension != ".hpp":
+                if extension not in EXTENSION_NECESSARY_FILES:
                     # And remove the rest (Useless files...)
                     os.remove(fileFullPath)
                     report_on_file(fileFullPath, Action.Bad)
